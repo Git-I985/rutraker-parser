@@ -8,7 +8,9 @@ import zlib from "node:zlib";
 const downloadFrom = "https://api.rutracker.cc/v1/static/pvc/f-all.tar"
 const downloadTo = "data"
 
+console.time('Total')
 function downloadAndExtractTar(url, file) {
+    console.time('Downloading tar')
     return new Promise((res, rej) => {
         https.get(url, {}, function (response) {
             if (response.statusCode >= 400) {
@@ -16,6 +18,7 @@ function downloadAndExtractTar(url, file) {
             }
             response.on('error', (err) => rej(err))
             response.on('end', () => {
+                console.timeEnd('Downloading tar')
                 res(true)
             });
             response.pipe(tar.x({
@@ -23,7 +26,7 @@ function downloadAndExtractTar(url, file) {
             }))
         });
     })
-    
+
 }
 
 async function getKeeperIds() {
@@ -35,21 +38,15 @@ if (!existsSync(downloadTo)) {
     await mkdir(downloadTo)
 }
 
-const [downloadStatus, keepersIds] = await Promise.all([
-    downloadAndExtractTar(downloadFrom, downloadTo),
+
+const [/*downloadStatus,*/ keepersIds] = await Promise.all([
+    // downloadAndExtractTar(downloadFrom, downloadTo),
     getKeeperIds()
 ])
 
+console.time('Execution')
 
-let time = 0
 const result = keepersIds.reduce((acc, id) => ({...acc, [id]: 0}), {})
-
-    
-// I NEED HELP BELOW 
-// I NEED HELP BELOW 
-// I NEED HELP BELOW 
-// I NEED HELP BELOW 
-
 
 const files = await readdir(downloadTo)
 
@@ -64,20 +61,18 @@ const parsings = files.map(file => new Promise((res) => {
     })
     unzipStream.on('finish', () => {
         const data = JSON.parse(Buffer.concat(chunks).toString())
-        const startTime = performance.now()
         for (const resultKey in (data?.result || {})) {
-            for (const keeperId of keepersIds) {
-                if (data?.result?.[resultKey]?.[5].includes(parseInt(keeperId))) {
-                    result[keeperId]++
+            for (const id of data?.result?.[resultKey]) {
+                if (keepersIds.includes(id.toString())) {
+                    result[id]++
                 }
             }
         }
-        const endTime = performance.now()
-        time+=endTime-startTime
         res()
     })
 }))
 
 await Promise.all(parsings)
-console.log(`Time for search`, time/1000)
 console.log('Result:', result)
+console.timeEnd('Total')
+console.timeEnd('Execution')
