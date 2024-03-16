@@ -44,33 +44,40 @@ const [downloadStatus, keepersIds] = await Promise.all([
 let time = 0
 const result = keepersIds.reduce((acc, id) => ({...acc, [id]: 0}), {})
 
-// const files = await readdir(downloadTo)
-//
-// const parsings = files.map(file => new Promise((res) => {
-//     const chunks = []
-//     const fullPath = path.join(downloadTo, file)
-//     const unzipStream = zlib.createGunzip()
-//     createReadStream(fullPath).pipe(unzipStream)
-//     unzipStream.on('data', (chunk) => chunks.push(chunk))
-//     unzipStream.on('error', (e) => {
-//         throw new Error(`Error while unzip ${fullPath}`, {cause: e})
-//     })
-//     unzipStream.on('finish', () => {
-//         const data = JSON.parse(Buffer.concat(chunks).toString())
-//         const startTime = performance.now()
-//         for (const resultKey in (data?.result || {})) {
-//             for (const keeperId of keepersIds) {
-//                 if (data?.result?.[resultKey]?.[5].includes(parseInt(keeperId))) {
-//                     result[keeperId]++
-//                 }
-//             }
-//         }
-//         const endTime = performance.now()
-//         time+=endTime-startTime
-//         res()
-//     })
-// }))
-//
-// await Promise.all(parsings)
-// console.log(`Time for search`, time/1000)
-// console.log('Result:', result)
+    
+// I NEED HELP BELOW 
+// I NEED HELP BELOW 
+// I NEED HELP BELOW 
+// I NEED HELP BELOW 
+
+
+const files = await readdir(downloadTo)
+
+const parsings = files.map(file => new Promise((res) => {
+    const chunks = []
+    const fullPath = path.join(downloadTo, file)
+    const unzipStream = zlib.createGunzip()
+    createReadStream(fullPath).pipe(unzipStream)
+    unzipStream.on('data', (chunk) => chunks.push(chunk))
+    unzipStream.on('error', (e) => {
+        throw new Error(`Error while unzip ${fullPath}`, {cause: e})
+    })
+    unzipStream.on('finish', () => {
+        const data = JSON.parse(Buffer.concat(chunks).toString())
+        const startTime = performance.now()
+        for (const resultKey in (data?.result || {})) {
+            for (const keeperId of keepersIds) {
+                if (data?.result?.[resultKey]?.[5].includes(parseInt(keeperId))) {
+                    result[keeperId]++
+                }
+            }
+        }
+        const endTime = performance.now()
+        time+=endTime-startTime
+        res()
+    })
+}))
+
+await Promise.all(parsings)
+console.log(`Time for search`, time/1000)
+console.log('Result:', result)
