@@ -38,7 +38,7 @@ if (!existsSync(downloadTo)) {
     await mkdir(downloadTo)
 }
 
-
+console.time('Execution')
 const [/*downloadStatus,*/ keepersIds] = await Promise.all([
     // downloadAndExtractTar(downloadFrom, downloadTo),
     getKeeperIds()
@@ -72,3 +72,4 @@ const parsings = files.map(file => new Promise((res) => {
 
 await Promise.all(parsings)
 console.log('Result:', result)
+console.timeEnd('Execution')
