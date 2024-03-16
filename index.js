@@ -44,8 +44,6 @@ const [/*downloadStatus,*/ keepersIds] = await Promise.all([
     getKeeperIds()
 ])
 
-console.time('Execution')
-
 const result = keepersIds.reduce((acc, id) => ({...acc, [id]: 0}), {})
 
 const files = await readdir(downloadTo)
@@ -62,7 +60,7 @@ const parsings = files.map(file => new Promise((res) => {
     unzipStream.on('finish', () => {
         const data = JSON.parse(Buffer.concat(chunks).toString())
         for (const resultKey in (data?.result || {})) {
-            for (const id of data?.result?.[resultKey]) {
+            for (const id of data?.result?.[resultKey]?.[5]) {
                 if (keepersIds.includes(id.toString())) {
                     result[id]++
                 }
@@ -74,5 +72,3 @@ const parsings = files.map(file => new Promise((res) => {
 
 await Promise.all(parsings)
 console.log('Result:', result)
-console.timeEnd('Total')
-console.timeEnd('Execution')
